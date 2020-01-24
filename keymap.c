@@ -356,17 +356,17 @@ void render_status(struct CharacterMatrix *matrix) {
   static const char os_logo[][2][3] PROGMEM  ={{{0x95,0x96,0},{0xb5,0xb6,0}},{{0x97,0x98,0},{0xb7,0xb8,0}}};
   if(keymap_config.swap_lalt_lgui==false){
     matrix_write_P(matrix, os_logo[0][0]);
+    matrix_write_P(matrix, PSTR(" "));
+    render_layer_status(matrix);
     matrix_write_P(matrix, PSTR("\n"));
     matrix_write_P(matrix, os_logo[0][1]);
   }else{
     matrix_write_P(matrix, os_logo[1][0]);
+    matrix_write_P(matrix, PSTR(" "));
+    render_layer_status(matrix);
     matrix_write_P(matrix, PSTR("\n"));
     matrix_write_P(matrix, os_logo[1][1]);
   }
-
-  matrix_write_P(matrix, PSTR(" "));
-  render_layer_status(matrix);
-  matrix_write_P(matrix, PSTR("\n"));
 
   // Host Keyboard LED Status
   matrix_write_P(matrix, (host_keyboard_leds() & (1<<USB_LED_NUM_LOCK)) ?
@@ -375,10 +375,9 @@ void render_status(struct CharacterMatrix *matrix) {
                  PSTR("CAPS") : PSTR("    "));
   matrix_write_P(matrix, (host_keyboard_leds() & (1<<USB_LED_SCROLL_LOCK)) ?
                  PSTR("SCLK") : PSTR("    "));
-  matrix_write_P(matrix, PSTR("\n"));
+  matrix_write_P(matrix, PSTR("\n\n"));
   render_rgbled_status(true, matrix);
 }
-
 
 void iota_gfx_task_user(void) {
   struct CharacterMatrix matrix;
@@ -394,8 +393,8 @@ void iota_gfx_task_user(void) {
     render_status(&matrix);
   }else{
     render_logo(&matrix);
-    render_rgbled_status(false, &matrix);
-    render_layer_status(&matrix);
+    // render_rgbled_status(false, &matrix);
+    // render_layer_status(&matrix);
   }
   matrix_update(&display, &matrix);
 }
