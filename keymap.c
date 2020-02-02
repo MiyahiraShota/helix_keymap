@@ -22,7 +22,7 @@ extern uint8_t is_master;
 // entirely and just use numbers.
 enum layer_number {
     _QWERTY = 0,
-    _GAME = 0,
+    _GAME,
     _LOWER,
     _RAISE,
     _ADJUST
@@ -30,6 +30,7 @@ enum layer_number {
 
 enum custom_keycodes {
   QWERTY = SAFE_RANGE,
+  GAME,
   LOWER,
   RAISE,
   ADJUST,
@@ -85,11 +86,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * `-------------------------------------------------------------------------------------------------'
    */
   [_GAME] = LAYOUT( \
-      _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______ \
-      _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______ \
-      _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______ \
-      _______, _______, _______, _______, _______, KC_M,    _______, _______, _______, _______, _______, _______, _______, _______ \
-      _______, KC_LALT, _______, _______, _______, KC_SPC,  _______, _______, _______, _______, _______, _______, _______, _______ \
+      _______, _______, _______, _______, _______, _______,                    _______, _______, _______, _______, _______, _______, \
+      _______, _______, _______, _______, _______, _______,                    _______, _______, _______, _______, _______, _______, \
+      _______, _______, _______, _______, _______, _______,                    _______, _______, _______, _______, _______, _______, \
+      _______, _______, _______, _______, _______, _______,  KC_M,    _______, _______, _______, _______, _______, _______, _______, \
+      _______, KC_LALT, _______, _______, _______, _______,  KC_SPC,  _______, _______, _______, _______, _______, _______, _______ \
       ),
 
   /* Lower
@@ -182,6 +183,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     case QWERTY:
       if (record->event.pressed) {
         persistent_default_layer_set(1UL<<_QWERTY);
+      }
+      return false;
+      break;
+    case GAME:
+      if (record->event.pressed) {
+        persistent_default_layer_set(1UL<<_GAME);
       }
       return false;
       break;
@@ -315,6 +322,7 @@ void matrix_update(struct CharacterMatrix *dest,
 
 //assign the right code to your layers for OLED display
 #define L_BASE 0
+#define L_GAME (1<<_GAME)
 #define L_LOWER (1<<_LOWER)
 #define L_RAISE (1<<_RAISE)
 #define L_ADJUST (1<<_ADJUST)
@@ -354,6 +362,9 @@ static void render_layer_status(struct CharacterMatrix *matrix) {
   char buf[10];
   matrix_write_P(matrix, PSTR("Layer: "));
     switch (layer_state) {
+        case L_GAME:
+           matrix_write_P(matrix, PSTR("Game"));
+           break;
         case L_BASE:
            matrix_write_P(matrix, PSTR("Default"));
            break;
