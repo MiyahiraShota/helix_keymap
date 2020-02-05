@@ -22,6 +22,7 @@ extern uint8_t is_master;
 // entirely and just use numbers.
 enum layer_number {
     _QWERTY = 0,
+    _GAME,
     _LOWER,
     _RAISE,
     _ADJUST
@@ -29,6 +30,7 @@ enum layer_number {
 
 enum custom_keycodes {
   QWERTY = SAFE_RANGE,
+  GAME,
   LOWER,
   RAISE,
   ADJUST,
@@ -68,6 +70,27 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
       KC_LCTL, KC_A,    KC_S,    KC_D,    KC_F, KC_G,                    KC_H,  KC_J, KC_K,    KC_L,    KC_SCLN, KC_QUOT, \
       KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_V, KC_B,  KC_LBRC, KC_RBRC, KC_N,  KC_M, KC_COMM, KC_DOT,  KC_SLSH, KC_ENT , \
       ADJUST,  _______, KC_LALT, _______, EISU, LOWER, GUI_SPC, KC_SPC,  RAISE, KANA, KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT \
+      ),
+
+  /* Game(win)
+   * ,-----------------------------------------.             ,-----------------------------------------.
+   * |      |      |      |      |      |      |             |      |      |      |      |      |      |
+   * |------+------+------+------+------+------|             |------+------+------+------+------+------|
+   * |      |      |      |      |      |      |             |      |      |      |      |      |      |
+   * |------+------+------+------+------+------|             |------+------+------+------+------+------|
+   * |      |      |      |      |      |      |             |      |      |      |      |      |      |
+   * |------+------+------+------+------+------+------+------+------+------+------+------+------+------|
+   * |      |      |      |      |      |      |  M   |      |      |      |      |      |      |      |
+   * |------+------+------+------+------+------+------+------+------+------+------+------+------+------|
+   * |      |win   |      |      |      |      |Space |      |      |      |      |      |      |      |
+   * `-------------------------------------------------------------------------------------------------'
+   */
+  [_GAME] = LAYOUT( \
+      _______, _______, _______, _______, _______, _______,                    _______, _______, _______, _______, _______, _______, \
+      _______, _______, _______, _______, _______, _______,                    _______, _______, _______, _______, _______, _______, \
+      _______, _______, _______, _______, _______, _______,                    _______, _______, _______, _______, _______, _______, \
+      _______, _______, _______, _______, _______, _______,  KC_M,    _______, _______, _______, _______, _______, _______, _______, \
+      _______, KC_LALT, _______, _______, _______, _______,  KC_SPC,  _______, _______, _______, _______, _______, _______, _______ \
       ),
 
   /* Lower
@@ -118,7 +141,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * |------+------+------+------+------+------|             |------+------+------+------+------+------|
    * |      | Reset|RGBRST|      |      |      |             |      |      |      |      |      |  Del |
    * |------+------+------+------+------+------|             |------+------+------+------+------+------|
-   * |      |      |      |      |      | Mac  |             | Win  |Qwerty|      |      |      |      |
+   * |      |      |      |      |      | Mac  |             | Win  |Qwerty|GAME  |      |      |      |
    * |------+------+------+------+------+------+------+------+------+------+------+------+------+------|
    * |      |      |      |      |      |      |      |      |      |      |RGB ON| HUE+ | SAT+ | VAL+ |
    * |------+------+------+------+------+------+------+------+------+------+------+------+------+------|
@@ -128,7 +151,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [_ADJUST] =  LAYOUT( \
       KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,                     KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12, \
       _______, RESET,   RGBRST,  _______, _______, _______,                   _______, _______, _______, _______, _______, KC_DEL, \
-      _______, _______, _______, _______, _______, AG_NORM,                   AG_SWAP, QWERTY,  _______, _______, _______, _______,\
+      _______, _______, _______, _______, _______, AG_NORM,                   AG_SWAP, QWERTY,  GAME,    _______, _______, _______,\
       _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, RGB_TOG, RGB_HUI, RGB_SAI, RGB_VAI, \
       _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, RGB_MOD, RGB_HUD, RGB_SAD, RGB_VAD \
       )
@@ -160,6 +183,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     case QWERTY:
       if (record->event.pressed) {
         persistent_default_layer_set(1UL<<_QWERTY);
+      }
+      return false;
+      break;
+    case GAME:
+      if (record->event.pressed) {
+        persistent_default_layer_set(1UL<<_GAME);
       }
       return false;
       break;
@@ -293,6 +322,7 @@ void matrix_update(struct CharacterMatrix *dest,
 
 //assign the right code to your layers for OLED display
 #define L_BASE 0
+#define L_GAME (1<<_GAME)
 #define L_LOWER (1<<_LOWER)
 #define L_RAISE (1<<_RAISE)
 #define L_ADJUST (1<<_ADJUST)
@@ -332,6 +362,9 @@ static void render_layer_status(struct CharacterMatrix *matrix) {
   char buf[10];
   matrix_write_P(matrix, PSTR("Layer: "));
     switch (layer_state) {
+        case L_GAME:
+           matrix_write_P(matrix, PSTR("Game"));
+           break;
         case L_BASE:
            matrix_write_P(matrix, PSTR("Default"));
            break;
