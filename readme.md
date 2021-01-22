@@ -1,4 +1,4 @@
-# The Default Helix Layout
+# Helix Layout
 ## Layout
 
 ### Qwerty
